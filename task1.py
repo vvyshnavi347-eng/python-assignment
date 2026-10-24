@@ -1,76 +1,85 @@
 
-# Campus Event Financial Planning
+print("===== EXAMINATION RESULT SYSTEM =====")
 
-print("===== CAMPUS EVENT FINANCIAL PLANNING =====")
+num_subjects = int(input("Enter number of subjects: "))
+pass_mark = float(input("Enter minimum pass mark: "))
+max_marks = float(input("Enter maximum marks per subject: "))
+grace_limit = float(input("Enter maximum grace marks per subject: "))
 
-# Input event expenses
-venue_cost = float(input("Enter venue cost: ₹"))
-equipment_cost = float(input("Enter equipment cost: ₹"))
-catering_cost = float(input("Enter catering cost: ₹"))
-transport_cost = float(input("Enter transport cost: ₹"))
-certificate_cost = float(input("Enter certificate cost per participant: ₹"))
+subjects = []
+total_marks = 0
+total_max_marks = 0
+failed_subjects = 0
+grace_used = 0
 
-# Input participant and funding details
-expected_participants = int(input("Enter expected participants: "))
-registration_fee = float(input("Enter registration fee per participant: ₹"))
-sponsorship = float(input("Enter sponsorship amount: ₹"))
+for i in range(num_subjects):
+    print(f"\nSubject {i + 1}")
+    name = input("Enter subject name: ")
+    marks = float(input("Enter marks obtained: "))
 
-# Calculate fixed expenses
-fixed_cost = (
-    venue_cost + equipment_cost + transport_cost
-)
+    # Validate marks
+    if marks < 0 or marks > max_marks:
+        print("Invalid marks! Enter marks within the valid range.")
+        continue
 
-# Calculate total event expenses
-catering_total = catering_cost * expected_participants
-certificates_total = certificate_cost * expected_participants
+    final_marks = marks
+    grace = 0
 
-total_cost = fixed_cost + catering_total + certificates_total
+    # Apply grace marks only when needed to pass
+    if marks < pass_mark:
+        required_grace = pass_mark - marks
 
-# Calculate participant contributions
-participant_contributions = (
-    expected_participants * registration_fee
-)
+        if required_grace <= grace_limit:
+            grace = required_grace
+            final_marks = min(marks + grace, max_marks)
+            print(f"Grace marks awarded: {grace}")
+        else:
+            print("Grace marks not sufficient to pass.")
 
-# Calculate total available funds
-total_funds = participant_contributions + sponsorship
-
-# Calculate sponsorship shortfall
-shortfall = max(0, total_cost - total_funds)
-
-# Calculate break-even registrations
-variable_cost_per_person = catering_cost + certificate_cost
-contribution_per_person = registration_fee - variable_cost_per_person
-
-if contribution_per_person > 0:
-    remaining_fixed_cost = max(0, fixed_cost - sponsorship)
-    break_even_count = (
-        int(remaining_fixed_cost // contribution_per_person)
-        + (1 if remaining_fixed_cost % contribution_per_person > 0 else 0)
-    )
-else:
-    break_even_count = None
-
-# Display financial report
-print("\n===== EVENT FINANCIAL REPORT =====")
-print(f"Venue Cost: ₹{venue_cost:.2f}")
-print(f"Equipment Cost: ₹{equipment_cost:.2f}")
-print(f"Catering Cost: ₹{catering_total:.2f}")
-print(f"Transport Cost: ₹{transport_cost:.2f}")
-print(f"Certificate Cost: ₹{certificates_total:.2f}")
-print(f"Total Event Cost: ₹{total_cost:.2f}")
-
-print(f"Participant Contributions: ₹{participant_contributions:.2f}")
-print(f"Sponsorship Received: ₹{sponsorship:.2f}")
-print(f"Total Available Funds: ₹{total_funds:.2f}")
-print(f"Sponsorship/Funding Shortfall: ₹{shortfall:.2f}")
-
-if break_even_count is not None:
-    print(f"Minimum Break-Even Registrations: {break_even_count}")
-
-    if break_even_count <= expected_participants:
-        print("Status: Break-even is achievable.")
+    # Check final pass/fail status
+    if final_marks >= pass_mark:
+        status = "PASS"
     else:
-        print("Status: More registrations or additional funding are needed.")
+        status = "FAIL"
+        failed_subjects += 1
+
+    total_marks += final_marks
+    total_max_marks += max_marks
+    grace_used += grace
+
+    subjects.append((name, marks, grace, final_marks, status))
+
+# Display subject-wise results
+print("\n===== FINAL MARKSHEET =====")
+
+for name, marks, grace, final_marks, status in subjects:
+    print(f"\nSubject: {name}")
+    print(f"Original Marks: {marks}")
+    print(f"Grace Marks: {grace}")
+    print(f"Final Marks: {final_marks}")
+    print(f"Result: {status}")
+
+# Calculate percentage
+if total_max_marks > 0:
+    percentage = (total_marks / total_max_marks) * 100
 else:
-    print("Break-even is not achievable at the current registration fee.")
-    print("Increase the fee or reduce variable costs.")
+    percentage = 0
+
+print("\n===== OVERALL RESULT =====")
+print(f"Total Marks: {total_marks}/{total_max_marks}")
+print(f"Percentage: {percentage:.2f}%")
+print(f"Total Grace Marks Used: {grace_used}")
+
+# Generate final classification
+if failed_subjects > 0:
+    classification = "FAIL"
+elif percentage >= 75:
+    classification = "DISTINCTION"
+elif percentage >= 60:
+    classification = "FIRST CLASS"
+elif percentage >= 50:
+    classification = "SECOND CLASS"
+else:
+    classification = "PASS"
+
+print(f"Final Classification: {classification}")
